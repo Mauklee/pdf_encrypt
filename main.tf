@@ -2,15 +2,16 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      version = "4.65.0"
+      version = "5.3.0"
     }
   }
 }
 
 provider "aws" {
-  # Configuration options
+  region = "us-east-1"
+  profile = "default"
+  
 }
-
 # VPC configuration
 resource "aws_vpc" "pdf_encrypt_vpc" {
   cidr_block = "10.0.0.0/16"  # Change this to your desired CIDR block
@@ -44,19 +45,16 @@ resource "aws_security_group" "pdf_encrypt_security_group" {
     Name = "pdf_encrypt_security_group"
   }
 }
-resource "tls_private_key" "key_pair" { #generate key pair in AWS
+/*resource "tls_private_key" "key_pair" { #generate key pair in AWS
   algorithm = "RSA"
   rsa_bits  = 4096
+}*/
+# deprciated as this this stores keys in security state and can only be used in Demo
+resource "aws_key_pair" "key_pair" { #Creating keypair
+  key_name = "var.key_pair_name"
+  public_key = file(demokey.pub)
 }
 
-resource "aws_key_pair" "key_pair" { #Creating keypair
-  key_name = "linux_key_pair"
-  public_key = tls_private_key.key_pair.public_key_openssh
-}
-resource "local_file" "ssh_key" {
-    filename = "{aws_key_pair.key_pair.key_name}.pem"
-     content  = tls_private_key.key_pair.private_key_pem
-}
 # Subnet configuration
 resource "aws_subnet" "pdf_encrypt_subnet" {
   vpc_id     = aws_vpc.pdf_encrypt_vpc.id
@@ -76,7 +74,7 @@ resource "aws_instance" "pdf_encrypt_instance" {
 
   user_data = <<-EOF
               #!/bin/bash
-              mkdir pdf-encrypt
+              mkdir pdfencrypt
               git clone https://github.com/openwall/john
               cd john/src
               sudo apt-get update
