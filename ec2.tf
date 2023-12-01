@@ -134,13 +134,13 @@ data "aws_ami" "amazon_linux_2" {
 
 
 
-resource "aws_instance" "windows_instance" {
+resource "aws_instance" "linux_instance" {
   ami = data.aws_ami.amazon_linux_2.id
-  #   ami             = data.aws_ami.windows_2016.id
+  #   ami             = 
   instance_type   = "t3.medium"
   subnet_id       = aws_subnet.public_subnet[0].id
   security_groups = [aws_security_group.linux_instance_sg.id]
-  key_name        = "cloudplexo-key"
+  key_name        = "var.keypair"
   root_block_device {
     volume_size           = 50
     volume_type           = "gp3"
@@ -151,6 +151,6 @@ resource "aws_instance" "windows_instance" {
   user_data                   = file("user-data.tpl")
 
   tags = {
-    Name = "${var.project}-windows-instance"
+    Name = "${var.project}-linux-instance"
   }
 }

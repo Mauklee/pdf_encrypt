@@ -15,3 +15,10 @@ variable "no_of_availability_zones" {
   type        = number
   default     = 3
 }
+
+variable "key_name" {
+  description = "keypair to be attached to ec2 instance"
+  type = string
+  default = "demo.pub"
+  
+}
